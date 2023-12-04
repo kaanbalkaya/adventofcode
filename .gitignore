@@ -1,5 +1,5 @@
 #ignore all output files
 *.out
-#ignore
-.gitignore
+#all ignore files
+*ignore*
 

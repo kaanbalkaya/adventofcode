@@ -1,19 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <cstring>
-/*
-returns the game number if possible, else returns 0 not to change the sum
-*/
+#include <map>
 
-// total: 12 red cubes, 13 green cubes, and 14 blue cubes
-enum Cubes{
-	red=12,
-	green=13,
-	blue=14
-};
-
-bool check_subset(std::string& str){
+std::map<std::string, int>& check_subset(std::string& str, std::map<std::string, int>& color_count){
 	//subset -> 11 red, 19 green, 1 blue
 	std::size_t start=0;
 	while(start!=std::string::npos){
@@ -24,18 +14,22 @@ bool check_subset(std::string& str){
 		//int num=std::strtok(color.c_str,' ');
 		//std::string c=std::strtok(NULL,' ');
 		size_t pos=color.find("red");
+		int count=0;
 		if(pos!=std::string::npos){
-			if(std::stoi(color.substr(0, pos-1))>Cubes::red)
-				return false;
+			count=std::stoi(color.substr(0, pos-1));
+			if(count>color_count["red"])
+				color_count["red"]=count;
 			
 		}else if((pos=color.find("green"))!=std::string::npos){
-			if(std::stoi(color.substr(0, pos-1))>Cubes::green)
-				return false;
+			count=std::stoi(color.substr(0, pos-1));
+			if(count>color_count["green"])
+				color_count["green"]=count;
 			
 			
 		}else if((pos=color.find("blue"))!=std::string::npos){
-			if(std::stoi(color.substr(0, pos-1))>Cubes::blue)
-				return false;
+			count=std::stoi(color.substr(0, pos-1));
+			if(count>color_count["blue"])
+				color_count["blue"]=count;
 			
 		}
 		
@@ -44,15 +38,19 @@ bool check_subset(std::string& str){
 	}
 	
 	
-	return true;
+	return color_count;
 }
 
 
 
-int is_possible(std::string& str){
+int get_power(std::string& str){
 	int retval=0;
+	std::map<std::string, int> color_count;
+	color_count["red"]=0;
+	color_count["green"]=0;
+	color_count["blue"]=0;
 	//example -> Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-	//std::vector<std::string> subsets;
+	
 	std::size_t start=str.find(':');
 	while(start!=std::string::npos){
 		//substr(pos, len);
@@ -61,28 +59,12 @@ int is_possible(std::string& str){
 		std::string subset=str.substr(start+1, finish-start-1);
 		//subsets.push_back(subset);
 
-		if(!check_subset(subset))
-			return 0;		
+		color_count=check_subset(subset,color_count);
 		start=finish;
 	}
 	
+	retval=color_count["red"]*color_count["green"]*color_count["blue"];
 	
-	/*
-	for(auto s:subsets){
-		start=0;
-		while(start!=std::string::npos){
-			//substr(pos, len);
-			//size_t find (char c, size_t pos = 0) const noexcept;
-			std::size_t finish=s.find(',',start)-1;
-			std::string color=s.substr(start, finish-start-1);
-			
-			start=finish+1;
-		}
-	}
-	*/
-	
-	retval=std::stoi(str.substr(5, str.find(':')));
-
 	return retval;
 }
 
@@ -97,7 +79,7 @@ int main(){
 	int sum=0;
 	while(getline(file, str)){
 		//std::cout<<str<<std::endl;
-		sum+=is_possible(str);
+		sum+=get_power(str);
 
 	}
 	std::cout<<sum<<std::endl;
